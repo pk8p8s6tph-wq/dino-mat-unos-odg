@@ -1,0 +1,9 @@
+{
+  "name": "DINO MATEMATIKA",
+  "short_name": "DINO MAT",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "start_url": "./index.html",
+  "icons": []
+}

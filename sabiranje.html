@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<title>DINO +</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#A5D6A7;font-family:-apple-system,Arial;display:flex;justify-content:center;overflow:hidden}
+#game{width:375px;max-width:100vw;height:100dvh;background:white;display:flex;flex-direction:column;padding:10px;position:relative}
+#top{display:flex;justify-content:space-between;background:#FFF9C4;padding:10px 14px;border-radius:12px;font-weight:bold;font-size:18px}
+#dinoArea{text-align:center;height:160px;position:relative}#dinoSvg{width:130px;height:130px;transition:.3s}#ime{font-weight:900;font-size:17px}
+#pitanje{font-size:56px;font-weight:900;text-align:center;margin:10px 0}#odgovori{display:grid;gap:11px;margin-top:auto;padding-bottom:10px}
+.odgovor{padding:18px;font-size:34px;font-weight:800;border-radius:16px;border:3px solid #2E7D32;background:#E8F5E9}
+#nagrada{text-align:center;font-size:28px;min-height:42px;font-weight:900}
+#confetti{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+#miniParada{position:absolute;bottom:75px;left:0;width:100%;height:50px;pointer-events:none;display:flex;justify-content:center;gap:8px}
+.miniDino{font-size:32px;animation:trci 1.2s ease-out forwards}
+@keyframes trci{0%{transform:translateX(-50px) scale(0.5)}50%{transform:translateX(0) scale(1.3)}100%{transform:translateX(80px) scale(1) translateY(-10px);opacity:0}}
+.skok{animation:skok.6s ease}
+@keyframes skok{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-35px) scale(1.3) rotate(-5deg)}60%{transform:translateY(-15px) scale(1.1) rotate(5deg)}100%{transform:translateY(0) scale(1)}}
+.tres{animation:tres.4s}
+@keyframes tres{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.back{display:inline-block;text-decoration:none;background:#eee;padding:6px 12px;border-radius:8px;font-size:13px;color:#333}
+</style>
+</head>
+<body>
+<div id="game"><canvas id="confetti"></canvas><a class="back" href="./index.html">← Nazad</a>
+<div id="top"><span id="bod">⭐ 0</span><span id="jaja">🥚 0</span></div>
+<div id="dinoArea"><div id="dinoHolder"></div><div id="ime">T-REX</div><div id="miniParada"></div></div>
+<div id="nagrada"></div><div id="pitanje"></div><div id="odgovori"></div></div>
+<script>
+const dinos=[
+{name:"T-REX",color:"#2E7D32",emoji:"🦖",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><circle cx="50" cy="62" r="28" fill="#4CAF50"/><circle cx="50" cy="35" r="19" fill="#66BB6A"/><circle cx="42" cy="31" r="5" fill="white"/><circle cx="58" cy="31" r="5" fill="white"/><circle cx="42" cy="32" r="2" fill="black"/><circle cx="58" cy="32" r="2" fill="black"/><path d="M40 44 Q50 50 60 44" stroke="black" fill="none" stroke-width="2"/></svg>`},
+{name:"BRONTO",color:"#1565C0",emoji:"🦕",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><ellipse cx="50" cy="70" rx="30" ry="20" fill="#42A5F5"/><circle cx="50" cy="33" r="18" fill="#90CAF9"/><circle cx="43" cy="31" r="4" fill="white"/><circle cx="57" cy="31" r="4" fill="white"/></svg>`},
+{name:"TRICE",color:"#6A1B9A",emoji:"🦕",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><circle cx="50" cy="65" r="27" fill="#AB47BC"/><circle cx="50" cy="38" r="20" fill="#CE93D8"/><circle cx="30" cy="28" r="4" fill="#E1BEE7"/><circle cx="70" cy="28" r="4" fill="#E1BEE7"/><circle cx="50" cy="20" r="3" fill="#E1BEE7"/><circle cx="42" cy="36" r="5" fill="white"/><circle cx="58" cy="36" r="5" fill="white"/></svg>`},
+{name:"STEGO",color:"#EF6C00",emoji:"🦕",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><ellipse cx="50" cy="68" rx="28" ry="18" fill="#FFA726"/><circle cx="50" cy="38" r="18" fill="#FFCC80"/><path d="M38 18 L42 28 L34 28 Z" fill="#EF6C00"/><path d="M52 14 L57 26 L47 26 Z" fill="#EF6C00"/></svg>`},
+{name:"PTERO",color:"#00838F",emoji:"🦅",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><circle cx="50" cy="55" r="20" fill="#26C6DA"/><path d="M8 50 Q22 32 38 50 Q22 56 8 50" fill="#4DD0E1"/><path d="M92 50 Q78 32 62 50 Q78 56 92 50" fill="#4DD0E1"/><circle cx="50" cy="38" r="14" fill="#80DEEA"/></svg>`},
+{name:"ANKYLO",color:"#5D4037",emoji:"🦖",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><ellipse cx="50" cy="68" rx="32" ry="20" fill="#8D6E63"/><circle cx="50" cy="40" r="18" fill="#BCAAA4"/><circle cx="20" cy="68" r="5" fill="#5D4037"/><circle cx="80" cy="68" r="5" fill="#5D4037"/></svg>`},
+{name:"RAPTOR",color:"#F44336",emoji:"🦖",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><circle cx="50" cy="60" r="24" fill="#EF5350"/><circle cx="50" cy="34" r="17" fill="#FF8A80"/><path d="M65 32 L80 26 L72 38 Z" fill="#FF8A80"/><circle cx="42" cy="32" r="4" fill="white"/><circle cx="42" cy="33" r="1.5" fill="black"/></svg>`},
+{name:"DIPLO",color:"#2E7D32",emoji:"🦕",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><ellipse cx="50" cy="72" rx="28" ry="16" fill="#66BB6A"/><path d="M78 70 Q95 65 90 50 Q80 58 72 62" fill="#66BB6A"/><circle cx="50" cy="38" r="16" fill="#A5D6A7"/></svg>`},
+{name:"PARA",color:"#1565C0",emoji:"🦕",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><circle cx="50" cy="62" r="26" fill="#42A5F5"/><circle cx="50" cy="36" r="18" fill="#90CAF9"/><path d="M32 30 Q50 20 68 30" fill="#EF5350" stroke="#C62828" stroke-width="2"/></svg>`},
+{name:"SPINO",color:"#FF6F00",emoji:"🦖",svg:`<svg id="dinoSvg" viewBox="0 0 100 100"><ellipse cx="50" cy="65" rx="26" ry="18" fill="#FFA726"/><path d="M35 45 L38 25 L42 45 L46 22 L50 45 L54 24 L58 45 L62 28 L65 45" fill="#EF6C00"/><circle cx="50" cy="38" r="15" fill="#FFCC80"/></svg>`}
+];
+let idx=0,bod=0,jaja=0,aCtx;const conf=document.getElementById('confetti');const cCtx=conf.getContext('2d');conf.width=375;conf.height=600;
+
+function zvukTacno(){
+ try{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();let t=aCtx.currentTime;[523,659,784,1046,784,1046].forEach((f,i)=>{let o=aCtx.createOscillator(),g=aCtx.createGain();o.connect(g);g.connect(aCtx.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(.3,t+i*.11);g.gain.exponentialRampToValueAtTime(.001,t+i*.11+.45);o.start(t+i*.11);o.stop(t+i*.11+.45);});}catch(e){}
+}
+function zvukNetacno(){
+ try{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();let t=aCtx.currentTime;let o=aCtx.createOscillator(),g=aCtx.createGain();o.connect(g);g.connect(aCtx.destination);o.type='sawtooth';o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(80,t+.4);g.gain.setValueAtTime(.4,t);g.gain.linearRampToValueAtTime(0.01,t+.5);o.start(t);o.stop(t+.5);
+ let o2=aCtx.createOscillator(),g2=aCtx.createGain();o2.connect(g2);g2.connect(aCtx.destination);o2.frequency.value=120;o2.type='square';g2.gain.setValueAtTime(.2,t);g2.gain.linearRampToValueAtTime(0.01,t+.3);o2.start(t);o2.stop(t+.3);
+ }catch(e){}
+}
+function konfete(){let parts=[];for(let i=0;i<120;i++) parts.push({x:187,y:220,vx:(Math.random()-0.5)*10,vy:Math.random()*-12-3,r:Math.random()*5+3,c:`hsl(${Math.random()*360},100%,50%)`,life:110});let id=setInterval(()=>{cCtx.clearRect(0,0,conf.width,conf.height);parts.forEach(p=>{p.x+=p.vx;p.vy+=0.28;p.y+=p.vy;p.life--;cCtx.fillStyle=p.c;cCtx.fillRect(p.x,p.y,p.r,p.r);});parts=parts.filter(p=>p.life>0&&p.y<900);if(!parts.length) clearInterval(id);},16);}
+function miniParada(){const parada=document.getElementById('miniParada');parada.innerHTML='';const emojis=['🦖','🦕','🐣','🥚','🦎'];for(let i=0;i<5;i++){setTimeout(()=>{let s=document.createElement('span');s.className='miniDino';s.innerText=emojis[Math.floor(Math.random()*emojis.length)];parada.appendChild(s);setTimeout(()=>s.remove(),1300);},i*120);}}
+function postavi(i){document.getElementById('dinoHolder').innerHTML=dinos[i].svg;document.getElementById('ime').innerText=dinos[i].name;document.getElementById('ime').style.color=dinos[i].color;}
+function novo(){let a=Math.floor(Math.random()*5)+1,b=Math.floor(Math.random()*5)+1,t=a+b;if(t>10){a=5;b=4;t=9;}document.getElementById('pitanje').innerText=`${a} + ${b} =?`;let op=[t];while(op.length<3){let r=Math.floor(Math.random()*11);if(!op.includes(r)) op.push(r);}op.sort(()=>Math.random()-.5);document.getElementById('odgovori').innerHTML=op.map(o=>`<button class="odgovor" onclick="check(${o},${t})">${o}</button>`).join('');}
+function check(k,t){
+ if(k===t){bod++;zvukTacno();konfete();miniParada();let d=document.getElementById('dinoHolder').firstChild;d.classList.remove('skok');void d.offsetWidth;d.classList.add('skok');document.getElementById('nagrada').innerText='🎉 BRAVO! 🎉';if(bod%5==0){jaja++;document.getElementById('nagrada').innerText='🥚 NOVI DINO!';}setTimeout(()=>{idx=(idx+1)%dinos.length;postavi(idx);document.getElementById('nagrada').innerText='';novo();},1100);}
+ else{zvukNetacno();if(jaja>0) jaja--;let d=document.getElementById('dinoHolder').firstChild;d.classList.remove('tres');void d.offsetWidth;d.classList.add('tres');document.getElementById('nagrada').innerText='💔 -1 JAJE! POKUŠAJ OPET';setTimeout(()=>document.getElementById('nagrada').innerText='',900);}
+ document.getElementById('bod').innerText=`⭐ ${bod}`;document.getElementById('jaja').innerText=`🥚 ${jaja}`;
+}
+postavi(0);novo();
+document.body.addEventListener('touchstart',()=>{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();},{once:true});
+</script></body></html>
