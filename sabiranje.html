@@ -20,8 +20,8 @@
 .tipka.del{background:#FFEBEE;border-color:#C62828}.tipka.ok{background:#2E7D32;color:white}
 #nagrada{text-align:center;font-size:26px;min-height:36px;font-weight:900}
 #confetti{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-.skok{animation:skok .75s cubic-bezier(.34,1.56,.64,1)}@keyframes skok{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-42px) scale(1.38)}100%{transform:translateY(0) scale(1)}}
-.tres{animation:tres .45s}@keyframes tres{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.skok{animation:skok.75s cubic-bezier(.34,1.56,.64,1)}@keyframes skok{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-42px) scale(1.38)}100%{transform:translateY(0) scale(1)}}
+.tres{animation:tres.45s}@keyframes tres{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 .float{animation:float 2s ease-in-out infinite}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .back{display:inline-block;text-decoration:none;background:#eee;padding:6px 12px;border-radius:8px;font-size:13px;color:#333}
 </style>
@@ -30,9 +30,7 @@
 <div id="game"><canvas id="confetti"></canvas><a class="back" href="./index.html">← Nazad</a>
 <div id="top"><span id="bod">⭐ 0</span><span id="jaja">🥚 0</span></div>
 <div id="dinoArea"><div id="holder" class="float"><div id="dinoSprite"></div></div><div id="ime">T-REX</div></div>
-<div id="pitanje"></div>
-<div id="unosBox"><div id="unos"></div></div>
-<div id="nagrada"></div>
+<div id="pitanje"></div><div id="unosBox"><div id="unos"></div></div><div id="nagrada"></div>
 <div id="tastatura">
 <button class="tipka" onclick="dodaj(1)">1</button><button class="tipka" onclick="dodaj(2)">2</button><button class="tipka" onclick="dodaj(3)">3</button>
 <button class="tipka" onclick="dodaj(4)">4</button><button class="tipka" onclick="dodaj(5)">5</button><button class="tipka" onclick="dodaj(6)">6</button>
@@ -41,16 +39,9 @@
 </div></div>
 <script>
 const dinos=[
-{name:"T-REX",color:"#2E7D32",pos:"0% 0%"},
-{name:"BRONTO",color:"#1565C0",pos:"25% 0%"},
-{name:"TRICE",color:"#6A1B9A",pos:"50% 0%"},
-{name:"STEGO",color:"#EF6C00",pos:"75% 0%"},
-{name:"PTERO",color:"#00838F",pos:"100% 0%"},
-{name:"RAPTOR",color:"#00897B",pos:"0% 100%"},
-{name:"ANKY",color:"#5D4037",pos:"25% 100%"},
-{name:"DIPLO",color:"#E91E63",pos:"50% 100%"},
-{name:"PARA",color:"#0D47A1",pos:"75% 100%"},
-{name:"SPINO",color:"#E65100",pos:"100% 100%"},
+{name:"T-REX",color:"#2E7D32",pos:"0% 0%"},{name:"BRONTO",color:"#1565C0",pos:"25% 0%"},{name:"TRICE",color:"#6A1B9A",pos:"50% 0%"},
+{name:"STEGO",color:"#EF6C00",pos:"75% 0%"},{name:"PTERO",color:"#00838F",pos:"100% 0%"},{name:"RAPTOR",color:"#00897B",pos:"0% 100%"},
+{name:"ANKY",color:"#5D4037",pos:"25% 100%"},{name:"DIPLO",color:"#E91E63",pos:"50% 100%"},{name:"PARA",color:"#0D47A1",pos:"75% 100%"},{name:"SPINO",color:"#E65100",pos:"100% 100%"},
 ];
 let idx=0,bod=0,jaja=0,aCtx,tacno=0,unosStr="";const conf=document.getElementById('confetti');const cCtx=conf.getContext('2d');conf.width=375;conf.height=600;
 function zvukTacno(){try{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();let t=aCtx.currentTime;[523,659,784,1046].forEach((f,i)=>{let o=aCtx.createOscillator(),g=aCtx.createGain();o.connect(g);g.connect(aCtx.destination);o.frequency.value=f;g.gain.setValueAtTime(.28,t+i*.11);g.gain.exponentialRampToValueAtTime(.001,t+i*.11+.45);o.start(t+i*.11);o.stop(t+i*.11+.45);});}catch(e){}}
@@ -60,6 +51,6 @@ function postavi(i){document.getElementById('dinoSprite').style.backgroundPositi
 function novo(){let a=Math.floor(Math.random()*5)+1,b=Math.floor(Math.random()*5)+1;tacno=a+b;if(tacno>10){a=5;b=4;tacno=9;}document.getElementById('pitanje').innerText=`${a} + ${b} =`;unosStr="";document.getElementById('unos').innerText="";}
 function dodaj(n){if(unosStr.length<2){unosStr+=n;document.getElementById('unos').innerText=unosStr;}}
 function obrisi(){unosStr=unosStr.slice(0,-1);document.getElementById('unos').innerText=unosStr;}
-function provjeri(){if(unosStr==="") return;let k=parseInt(unosStr);let holder=document.getElementById('holder');if(k===tacno){bod++;zvukTacno();konfete();holder.classList.remove('skok');void holder.offsetWidth;holder.classList.add('skok');document.getElementById('nagrada').innerText='🎉 BRAVO! 🎉';if(bod%5==0){jaja++;document.getElementById('nagrada').innerText='🥚 NOVI DINO!';}setTimeout(()=>{idx=(idx+1)%dinos.length;postavi(idx);document.getElementById('nagrada').innerText='';holder.classList.remove('skok');novo();},1100);}else{zvukNetacno();if(jaja>0) jaja--;holder.classList.remove('tres');void holder.offsetWidth;holder.classList.add('tres');document.getElementById('nagrada').innerText=`💔 Tačno je ${tacno}`;setTimeout(()=>{document.getElementById('nagrada').innerText='';holder.classList.remove('tres');unosStr="";document.getElementById('unos').innerText="";},1300);}document.getElementById('bod').innerText=`⭐ ${bod}`;document.getElementById('jaja').innerText=`🥚 ${jaja}`;}
+function provjeri(){if(unosStr==="") return;let k=parseInt(unosStr);let holder=document.getElementById('holder');if(k===tacno){bod++;zvukTacno();konfete();holder.classList.remove('skok');void holder.offsetWidth;holder.classList.add('skok');document.getElementById('nagrada').innerText='🎉 BRAVO! 🎉';if(bod%5==0){jaja++;document.getElementById('nagrada').innerText='🥚 NOVI DINO!';}setTimeout(()=>{idx=(idx+1)%dinos.length;postavi(idx);document.getElementById('nagrada').innerText='';holder.classList.remove('skok');novo();},1100);}else{zvukNetacno();if(jaja>0) jaja--;holder.classList.remove('tres');void holder.offsetWidth;holder.classList.add('tres');document.getElementById('nagrada').innerText='💔 -1 JAJE!';setTimeout(()=>{document.getElementById('nagrada').innerText='';holder.classList.remove('tres');unosStr="";document.getElementById('unos').innerText="";},900);}document.getElementById('bod').innerText=`⭐ ${bod}`;document.getElementById('jaja').innerText=`🥚 ${jaja}`;}
 postavi(0);novo();document.body.addEventListener('touchstart',()=>{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();},{once:true});
 </script></body></html>
