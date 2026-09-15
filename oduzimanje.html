@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="bs">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <link rel="manifest" href="./manifest.json">
 <title>ODUZIMANJE 240 DINO</title>
 <style>
@@ -17,7 +18,7 @@
 .tipka{padding:16px 0;font-size:28px;font-weight:800;border-radius:14px;border:3px solid #C62828;background:white}
 .tipka:active{transform:scale(0.94);background:#C62828;color:white}
 .tipka.del{background:#FFEBEE}.tipka.ok{background:#C62828;color:white}
-#nagrada{text-align:center;font-size:24px;min-height:32px;font-weight:900}
+#nagrada{text-align:center;font-size:22px;min-height:52px;font-weight:900;line-height:1.2}
 #confetti{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 .skok{animation:skok.75s cubic-bezier(.34,1.56,.64,1)}@keyframes skok{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-42px) scale(1.38)}100%{transform:translateY(0) scale(1)}}
 .tres{animation:tres.45s}@keyframes tres{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
@@ -44,15 +45,46 @@ const SPRITES=[
 ];
 let all=[];SPRITES.forEach(f=>{for(let i=0;i<10;i++) all.push({file:f,x:(i%5)*25,y:Math.floor(i/5)*100})});
 let order=[...Array(all.length).keys()].sort(()=>Math.random()-0.5);
-let pos=0,bod=0,jaja=0,aCtx,tacno=0,unosStr="";
+let pos=0,bod=0,jaja=0,aCtx,tacno=0,unosStr="",pitanjeText="";
+let nizTacnih=0,nizNetacnih=0,blokirano=false;
 const conf=document.getElementById('confetti');const cCtx=conf.getContext('2d');conf.width=375;conf.height=700;
 function zvukTacno(){try{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();let t=aCtx.currentTime;[523,659,784,1046].forEach((f,i)=>{let o=aCtx.createOscillator(),g=aCtx.createGain();o.connect(g);g.connect(aCtx.destination);o.frequency.value=f;g.gain.setValueAtTime(.28,t+i*.11);g.gain.exponentialRampToValueAtTime(.001,t+i*.11+.45);o.start(t+i*.11);o.stop(t+i*.11+.45);});}catch(e){}}
 function zvukNetacno(){try{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();let t=aCtx.currentTime;let o=aCtx.createOscillator(),g=aCtx.createGain();o.connect(g);g.connect(aCtx.destination);o.type='sawtooth';o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(70,t+.45);g.gain.setValueAtTime(.4,t);g.gain.linearRampToValueAtTime(0.01,t+.5);o.start(t);o.stop(t+.5);}catch(e){}}
 function konfete(){let p=[];for(let i=0;i<120;i++) p.push({x:187,y:220,vx:(Math.random()-0.5)*11,vy:Math.random()*-12-3,r:Math.random()*6+3,c:`hsl(${Math.random()*360},100%,50%)`,life:110});let id=setInterval(()=>{cCtx.clearRect(0,0,conf.width,conf.height);p.forEach(o=>{o.x+=o.vx;o.vy+=0.28;o.y+=o.vy;o.life--;cCtx.fillStyle=o.c;cCtx.fillRect(o.x,o.y,o.r,o.r);});p=p.filter(o=>o.life>0&&o.y<900);if(!p.length) clearInterval(id);},16);}
 function postavi(){if(pos>=order.length){order=order.sort(()=>Math.random()-0.5);pos=0;}let d=all[order[pos]];let el=document.getElementById('dinoSprite');el.style.backgroundImage=`url('${d.file}')`;el.style.backgroundPosition=`${d.x}% ${d.y}%`;document.getElementById('br').innerText=`🦕 ${pos+1}/240`;pos++;}
-function novo(){let a=Math.floor(Math.random()*10)+1;let b=Math.floor(Math.random()*a)+1;tacno=a-b;document.getElementById('pitanje').innerText=`${a} - ${b} =`;unosStr="";document.getElementById('unos').innerText="";}
-function dodaj(n){if(unosStr.length<2){unosStr+=n;document.getElementById('unos').innerText=unosStr;}}
-function obrisi(){unosStr=unosStr.slice(0,-1);document.getElementById('unos').innerText=unosStr;}
-function provjeri(){if(unosStr==="") return;let k=parseInt(unosStr);let holder=document.getElementById('holder');if(k===tacno){bod++;zvukTacno();konfete();holder.classList.remove('skok');void holder.offsetWidth;holder.classList.add('skok');document.getElementById('nagrada').innerText='🎉 BRAVO! 🎉';if(bod%5==0){jaja++;document.getElementById('nagrada').innerText='🥚 NOVI DINO!';}setTimeout(()=>{postavi();document.getElementById('nagrada').innerText='';holder.classList.remove('skok');novo();},1100);}else{zvukNetacno();if(jaja>0) jaja--;holder.classList.remove('tres');void holder.offsetWidth;holder.classList.add('tres');document.getElementById('nagrada').innerText='💔 -1 JAJE!';setTimeout(()=>{document.getElementById('nagrada').innerText='';holder.classList.remove('tres');unosStr="";document.getElementById('unos').innerText="";},900);}document.getElementById('bod').innerText=`⭐ ${bod}`;document.getElementById('jaja').innerText=`🥚 ${jaja}`;}
+function novo(){let a=Math.floor(Math.random()*10)+1;let b=Math.floor(Math.random()*a)+1;tacno=a-b;pitanjeText=`${a} - ${b}`;document.getElementById('pitanje').innerText=`${pitanjeText} =`;unosStr="";document.getElementById('unos').innerText="";}
+function dodaj(n){if(blokirano) return;if(unosStr.length<2){unosStr+=n;document.getElementById('unos').innerText=unosStr;}}
+function obrisi(){if(blokirano) return;unosStr=unosStr.slice(0,-1);document.getElementById('unos').innerText=unosStr;}
+function provjeri(){
+  if(unosStr==="" || blokirano) return;
+  let k=parseInt(unosStr);let holder=document.getElementById('holder');let nagradaEl=document.getElementById('nagrada');
+  if(k===tacno){
+    bod++;nizTacnih++;nizNetacnih=0;zvukTacno();konfete();
+    holder.classList.remove('skok');void holder.offsetWidth;holder.classList.add('skok');
+    nagradaEl.innerHTML='🎉 BRAVO! 🎉';if(bod%5==0){jaja++;nagradaEl.innerHTML='🥚 NOVI DINO!';}
+    blokirano=true;setTimeout(()=>{postavi();nagradaEl.innerHTML='';holder.classList.remove('skok');novo();blokirano=false;},1100);
+  }else{
+    nizNetacnih++;nizTacnih=0;zvukNetacno();if(jaja>0) jaja--;
+    holder.classList.remove('tres');void holder.offsetWidth;holder.classList.add('tres');
+    if(nizNetacnih>=3){
+      blokirano=true;document.getElementById('tastatura').style.opacity='0.25';document.getElementById('tastatura').style.pointerEvents='none';
+      let ostalo=10;
+      nagradaEl.innerHTML=`⏳ Sačekaj ${ostalo}s...<br><span style="font-size:22px;color:#C62828">${pitanjeText} = ${tacno}</span>`;
+      let timer=setInterval(()=>{
+        ostalo--;if(ostalo>0){
+          nagradaEl.innerHTML=`⏳ Sačekaj ${ostalo}s...<br><span style="font-size:22px;color:#C62828">${pitanjeText} = ${tacno}</span>`;
+        }else{
+          clearInterval(timer);nagradaEl.innerHTML='';holder.classList.remove('tres');
+          document.getElementById('tastatura').style.opacity='1';document.getElementById('tastatura').style.pointerEvents='auto';
+          unosStr="";document.getElementById('unos').innerText="";nizNetacnih=0;postavi();novo();blokirano=false;
+        }
+      },1000);
+    }else{
+      nagradaEl.innerText=`💔 -1 JAJE! (${nizNetacnih}/3)`;
+      setTimeout(()=>{nagradaEl.innerText='';holder.classList.remove('tres');unosStr="";document.getElementById('unos').innerText="";},900);
+    }
+  }
+  document.getElementById('bod').innerText=`⭐ ${bod}`;document.getElementById('jaja').innerText=`🥚 ${jaja}`;
+}
 postavi();novo();document.body.addEventListener('touchstart',()=>{if(!aCtx) aCtx=new(window.AudioContext||window.webkitAudioContext)();},{once:true});
 </script></body></html>
