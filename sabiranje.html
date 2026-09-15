@@ -36,7 +36,7 @@
 <button class="tipka del" onclick="obrisi()">⌫</button><button class="tipka" onclick="dodaj(0)">0</button><button class="tipka ok" onclick="provjeri()">OK</button>
 </div></div>
 <script>
-const SPRITES=['./dino1.png','./dino2.png','./dino3.png','./dino4.png','./dino5.png','./dino6.png','./dino7.png','./dino8.png','./dino9.png','./dino10.png'];
+const SPRITES=['./dino1.png','./dino2.png','./dino3.png','./dino4.png','./dino5.png','./dino6.png','./dino7.png','./dino8.png','./dino9.png','./dino10.png','./dino11.png','./dino12.png','./dino13.png','./dino14.png','./dino15.png','./dino16.png','./dino17.png','./dino18.png','./dino19.png','./dino20.png','./dino21.png','./dino22.png','./dino23.png','./dino24.png'];
 let all=[];SPRITES.forEach(f=>{for(let i=0;i<10;i++) all.push({file:f,x:(i%5)*25,y:Math.floor(i/5)*100})});
 let order=[...Array(all.length).keys()].sort(()=>Math.random()-0.5);
 let pos=0,bod=0,jaja=0,aCtx,tacno=0,unosStr="";
