@@ -25,7 +25,9 @@ body.oduzimanje{background:#FFCDD2}
 #brojalica .op{font-size:24px;font-weight:900;margin:0 4px;color:#555}
 #scribbleBox{margin:12px;border:3px solid #2E7D32;border-radius:18px;padding:12px;background:#F1F8E9}
 #scribbleBox label{font-weight:800;color:#2E7D32;display:block;margin-bottom:8px;font-size:14px}
-#scribbleInput{width:100%;height:84px;font-size:52px;font-weight:900;text-align:center;border:3px dashed #90A4AE;border-radius:14px;background:#fff;outline:none}
+#scribbleInput{width:100%;height:84px;font-size:52px;font-weight:900;text-align:center;border:3px dashed #90A4AE;border-radius:14px;background:#fff;outline:none;caret-color:transparent;color:#212121}
+#scribbleInput::selection{background:transparent}
+#scribbleInput:focus{outline:none;border-color:#2E7D32}
 #scribbleHint{font-size:12px;color:#666;text-align:center;margin-top:6px}
 #unosBox{display:flex;justify-content:center;align-items:center;gap:10px;margin:8px}
 #unos{width:90px;height:62px;border:3px solid #2E7D32;border-radius:14px;text-align:center;font-size:32px;font-weight:900;line-height:56px;background:#fff}
@@ -47,8 +49,8 @@ body.oduzimanje{background:#FFCDD2}
 <div id="brojalica"></div>
 <div id="scribbleBox">
 <label>✏️ Piši olovkom ovdje:</label>
-<input id="scribbleInput" type="text" inputmode="numeric" lang="sr" placeholder="5" autocomplete="off" autocorrect="off" spellcheck="false">
-<div id="scribbleHint">Apple Pencil - iPad sam pretvara rukopis u broj</div>
+<input id="scribbleInput" type="text" inputmode="numeric" lang="sr" autocomplete="off" autocorrect="off" spellcheck="false">
+<div id="scribbleHint">Apple Pencil - 2.5s pauza da završiš broj</div>
 </div>
 <div id="unosBox"><div id="unos"></div><div id="msg"></div></div>
 <div class="keypad">
@@ -66,42 +68,16 @@ let order=[...Array(240).keys()].sort(()=>Math.random()-0.5);
 let pos=0,bod=0,jaja=0,nizNet=0,blok=false,mode=localStorage.getItem('dino_mode')||'sab',a,b,tacno;
 const dinoImg=document.getElementById('dinoImg'),dinoFallback=document.getElementById('dinoFallback'),zadDiv=document.getElementById('zad'),brojalica=document.getElementById('brojalica'),unosDiv=document.getElementById('unos'),msgDiv=document.getElementById('msg'),scribbleInput=document.getElementById('scribbleInput');
 const sabBtn=document.getElementById('sabBtn'),oduBtn=document.getElementById('oduBtn');
-
-// ZVUKOVI - FIX ZA iPAD - radi od prvog dodira
 let audioCtx=null;
 function getAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-function unlockAudio(){
-  try{
-    const ac=getAudio();
-    if(ac.state==='suspended') ac.resume();
-    const o=ac.createOscillator(),g=ac.createGain();
-    g.gain.value=0; o.connect(g); g.connect(ac.destination);
-    o.start(); o.stop(ac.currentTime+0.01);
-  }catch{}
-}
+function unlockAudio(){ try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); g.gain.value=0; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.01);}catch{} }
 document.addEventListener('pointerdown',()=>{ unlockAudio(); }, {once:false});
 document.addEventListener('touchstart',()=>{ unlockAudio(); }, {once:false});
-
-function zvukTacno(){
- try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value=523; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(1046,ac.currentTime+0.25); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.35); o.start(); o.stop(ac.currentTime+0.35);}catch{}
-}
-function zvukNetacno(){
- try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); o.type='sawtooth'; o.connect(g); g.connect(ac.destination); o.frequency.value=200; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(60,ac.currentTime+0.4); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.4); o.start(); o.stop(ac.currentTime+0.4);}catch{}
-}
-
+function zvukTacno(){ try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value=523; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(1046,ac.currentTime+0.25); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.35); o.start(); o.stop(ac.currentTime+0.35);}catch{} }
+function zvukNetacno(){ try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); o.type='sawtooth'; o.connect(g); g.connect(ac.destination); o.frequency.value=200; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(60,ac.currentTime+0.4); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.4); o.start(); o.stop(ac.currentTime+0.4);}catch{} }
 function updMode(){ if(mode==='sab'){document.body.classList.remove('oduzimanje');sabBtn.classList.add('active');oduBtn.classList.remove('active');document.getElementById('unos').style.borderColor='#2E7D32';document.getElementById('okBtn').style.background='#2E7D32'}else{document.body.classList.add('oduzimanje');oduBtn.classList.add('active');sabBtn.classList.remove('active');document.getElementById('unos').style.borderColor='#C62828';document.getElementById('okBtn').style.background='#C62828'} localStorage.setItem('dino_mode',mode); }
 sabBtn.onclick=()=>{unlockAudio(); mode='sab';updMode();novo()}; oduBtn.onclick=()=>{unlockAudio(); mode='odu';updMode();novo()}; updMode();
-
-function showDino(){
-  const it=all[order[pos]];
-  const col = it.x / 25; const row = it.y / 100;
-  dinoImg.style.display='none'; dinoFallback.style.display='none';
-  const temp=new Image();
-  temp.onload=()=>{ dinoImg.src=it.file; dinoImg.style.left=`-${col*100}%`; dinoImg.style.top=`-${row*100}%`; dinoImg.style.display='block'; dinoFallback.style.display='none'; };
-  temp.onerror=()=>{ dinoImg.style.display='none'; dinoFallback.style.display='flex'; };
-  temp.src=it.file;
-  document.getElementById('kol').textContent=pos+1;
-}
+function showDino(){ const it=all[order[pos]]; const col=it.x/25; const row=it.y/100; dinoImg.style.display='none'; dinoFallback.style.display='none'; const temp=new Image(); temp.onload=()=>{ dinoImg.src=it.file; dinoImg.style.left=`-${col*100}%`; dinoImg.style.top=`-${row*100}%`; dinoImg.style.display='block'; dinoFallback.style.display='none'; }; temp.onerror=()=>{ dinoImg.style.display='none'; dinoFallback.style.display='flex'; }; temp.src=it.file; document.getElementById('kol').textContent=pos+1; }
 function novo(){
   showDino();
   if(mode==='sab'){
@@ -125,10 +101,24 @@ function novo(){
   unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent='';
 }
 scribbleInput.addEventListener('pointerdown',()=>{unlockAudio();});
-scribbleInput.addEventListener('input',()=>{ unlockAudio(); let v=scribbleInput.value.replace(/[^0-9]/g,'').slice(0,2); if(v!==scribbleInput.value) scribbleInput.value=v; if(v!==''){ unosDiv.textContent=v; if(!blok) setTimeout(()=>{ const vv=parseInt(unosDiv.textContent); if(!isNaN(vv)) check(); },600); }});
+scribbleInput.addEventListener('input',()=>{
+  unlockAudio();
+  let v=scribbleInput.value.replace(/[^0-9]/g,'').slice(0,2);
+  if(v!==scribbleInput.value) scribbleInput.value=v;
+  if(v!==''){
+    unosDiv.textContent=v;
+    if(!blok){
+      clearTimeout(window.dinoTimer);
+      window.dinoTimer=setTimeout(()=>{
+        const vv=parseInt(unosDiv.textContent);
+        if(!isNaN(vv)) check();
+      },2500);
+    }
+  }
+});
 document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ unlockAudio(); if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
 document.getElementById('delBtn').onclick=()=>{ unlockAudio(); unosDiv.textContent=unosDiv.textContent.slice(0,-1); scribbleInput.value=unosDiv.textContent; };
-document.getElementById('okBtn').onclick=()=>{ unlockAudio(); check(); };
+document.getElementById('okBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); check(); };
 function check(){
   if(blok)return;
   const v=parseInt(unosDiv.textContent||scribbleInput.value);
