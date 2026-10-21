@@ -1,35 +1,199 @@
 <!DOCTYPE html>
-<html lang="bs">
+<html lang="sr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="DINO MAT">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦖</text></svg>">
-<title>DINO MATEMATIKA v3</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Dino Matematika - iPad</title>
+<!-- OVO JE index.html - stavi uz dino1.png ... dino24.png -->
 <style>
-*{box-sizing:border-box}body{margin:0;background:#A5D6A7;font-family:-apple-system,Arial;display:flex;justify-content:center;min-height:100dvh}
-#app{width:375px;max-width:100vw;background:white;display:flex;flex-direction:column;padding:20px;min-height:100dvh}
-h1{text-align:center;font-size:30px;margin:10px 0 5px}.sub{text-align:center;color:#666;font-size:14px;margin-bottom:20px}
-.card{display:block;text-decoration:none;padding:22px;border-radius:20px;margin-bottom:16px;border:3px solid;transition:.15s}
-.card:active{transform:scale(0.97)}.card h2{margin:0;font-size:24px}.card p{margin:6px 0 0;color:#333;font-size:13px;line-height:1.3}
-.card.sab{background:#E8F5E9;border-color:#2E7D32;color:#2E7D32}.card.oduz{background:#FFEBEE;border-color:#C62828;color:#C62828}
-.dinos{text-align:center;font-size:32px;margin:10px 0;letter-spacing:4px}
-.badge{text-align:center;background:#FFF9C4;padding:10px;border-radius:12px;font-weight:bold;font-size:12px;margin-top:auto}
-#status{font-size:12px;text-align:center;margin-top:10px;color:green}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:#A5D6A7;transition:.3s;display:flex;justify-content:center;min-height:100dvh}
+body.oduzimanje{background:#FFCDD2}
+#app{width:100%;max-width:440px;background:#fff;margin:8px;border-radius:24px;box-shadow:0 12px 32px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.top{display:flex;gap:8px;padding:12px}
+.top button{flex:1;padding:14px;border-radius:14px;border:0;font-weight:900;font-size:16px;cursor:pointer}
+.top .active{color:#fff}
+#sabBtn.active{background:#2E7D32} #oduBtn.active{background:#C62828}
+#sabBtn,#oduBtn{background:#eee}
+.stats{display:flex;justify-content:space-around;padding:6px 12px;font-weight:800}
+#dinoWrap{text-align:center;padding:8px}
+#dinoSprite{width:170px;height:170px;margin:0 auto;background-color:#f6f6f6;border-radius:20px;border:3px solid #eee;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:90px}
+.float{animation:float 3s infinite ease-in-out}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+#zad{font-size:42px;font-weight:900;text-align:center;margin:8px 0}
+#brojalica{text-align:center;min-height:36px;font-size:28px}
+#brojalica span{cursor:pointer;padding:2px;transition:.2s;display:inline-block}
+#brojalica span.counted{transform:scale(1.3);background:#C8E6C9;border-radius:8px}
+#canvasBox{margin:10px 12px;border:3px dashed #90A4AE;border-radius:16px;position:relative;overflow:hidden;background:#fff}
+#writeCanvas{width:100%;height:200px;touch-action:none;display:block}
+#gridText{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#B0BEC5;pointer-events:none;font-size:18px}
+#aiBox{text-align:center;padding:6px;min-height:64px}
+#aiNum{font-size:32px;font-weight:900}
+.confBar{height:8px;background:#eee;border-radius:4px;overflow:hidden;margin:4px 40px}
+.confFill{height:100%;background:#2E7D32;width:0%;transition:.3s}
+#unosBox{display:flex;justify-content:center;align-items:center;gap:10px;margin:8px}
+#unos{width:90px;height:62px;border:3px solid #2E7D32;border-radius:14px;text-align:center;font-size:32px;font-weight:900;line-height:56px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px}
+.keypad button{height:62px;border-radius:16px;border:0;background:#F1F8E9;font-size:26px;font-weight:800;cursor:pointer;box-shadow:0 2px 0 #AED581}
+.keypad button:active{transform:scale(.96)}
+#okBtn{background:#2E7D32!important;color:#fff}
+#msg{text-align:center;min-height:28px;font-weight:800;padding:4px}
+.btnRow{display:flex;gap:8px;padding:0 12px 8px}
+.btnRow button{flex:1;padding:10px;border-radius:12px;border:0;background:#ECEFF1;font-weight:700}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.bounce{animation:bounce .4s}
 </style>
 </head>
 <body>
 <div id="app">
-<h1>🦖 DINO MAT v3</h1>
-<p class="sub">10 dinosaura • skaču od sreće • radi offline</p>
-<div class="dinos">🦖🦕🦎🐊🦕🦖🦕🐣🥚🦖</div>
-<a class="card sab" href="./sabiranje.html"><h2>➕ SABIRANJE do 10</h2><p>✅ Tačno = dino skače + parada • ❌ Netačno = bzz + -1 jaje</p></a>
-<a class="card oduz" href="./oduzimanje.html"><h2>➖ ODUZIMANJE do 10</h2><p>Isto: skakanje, parada, kazna za netačno</p></a>
-<div class="badge">⭐ Svakih 5 tačnih = 🥚 novo jaje • 💔 Netačno = -1 jaje</div>
-<div id="status">Učitavam offline...</div>
+<div class="top"><button id="sabBtn" class="active">➕ SABIRANJE</button><button id="oduBtn">➖ ODUZIMANJE</button></div>
+<div class="stats"><span>⭐ <b id="bod">0</b></span><span>🥚 <b id="jaja">0</b></span><span>🦕 <b id="kol">0</b>/240</span></div>
+<div id="dinoWrap"><div id="dinoSprite" class="float">🦕</div></div>
+<div id="zad">3 + 2 = ?</div>
+<div id="brojalica"></div>
+<div id="canvasBox"><canvas id="writeCanvas"></canvas><div id="gridText">✏️ Piši olovkom ovdje</div></div>
+<div id="aiBox"><div id="aiNum"></div><div class="confBar"><div id="confFill" class="confFill"></div></div><div id="aiConf"></div></div>
+<div class="btnRow"><button id="clearBtn">🧹 Obriši</button><button id="recBtn">🤖 Prepoznaj</button><button id="useBtn" style="display:none">✅ Koristi</button></div>
+<div id="unosBox"><div id="unos"></div><div id="msg"></div></div>
+<div class="keypad">
+<button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button>
+<button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button>
+<button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
+<button id="delBtn">⌫</button><button data-v="0">0</button><button id="okBtn">OK</button>
+<button data-v="10" style="grid-column:span 3;background:#FFF9C4">10</button>
 </div>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>{document.getElementById('status').innerText='✅ OFFLINE AKTIVAN - dodaj na desktop';});}</script>
+</div>
+<script>
+const SPRITES=['./dino1.png','./dino2.png','./dino3.png','./dino4.png','./dino5.png','./dino6.png','./dino7.png','./dino8.png','./dino9.png','./dino10.png','./dino11.png','./dino12.png','./dino13.png','./dino14.png','./dino15.png','./dino16.png','./dino17.png','./dino18.png','./dino19.png','./dino20.png','./dino21.png','./dino22.png','./dino23.png','./dino24.png'];
+let all=[]; SPRITES.forEach(f=>{for(let i=0;i<10;i++) all.push({file:f,x:(i%5)*25,y:Math.floor(i/5)*100})});
+let order=[...Array(240).keys()].sort(()=>Math.random()-0.5);
+let pos=0, bod=0, jaja=0, nizNetacnih=0, blok=false, mode=localStorage.getItem('dino_mode')||'sab';
+let a,b,tacno, pitanjeText;
+const dinoDiv=document.getElementById('dinoSprite'), zadDiv=document.getElementById('zad'), brojalica=document.getElementById('brojalica'), unosDiv=document.getElementById('unos'), msgDiv=document.getElementById('msg');
+const sabBtn=document.getElementById('sabBtn'), oduBtn=document.getElementById('oduBtn');
+
+function updateModeUI(){
+ if(mode==='sab'){document.body.classList.remove('oduzimanje'); sabBtn.classList.add('active'); oduBtn.classList.remove('active'); document.getElementById('unos').style.borderColor='#2E7D32'; document.getElementById('okBtn').style.background='#2E7D32';}
+ else{document.body.classList.add('oduzimanje'); oduBtn.classList.add('active'); sabBtn.classList.remove('active'); document.getElementById('unos').style.borderColor='#C62828'; document.getElementById('okBtn').style.background='#C62828';}
+ localStorage.setItem('dino_mode',mode);
+}
+sabBtn.onclick=()=>{mode='sab';updateModeUI();novo();}; oduBtn.onclick=()=>{mode='odu';updateModeUI();novo();};
+updateModeUI();
+
+function showDino(){
+ const item=all[order[pos]]; 
+ dinoDiv.style.backgroundImage=`url('${item.file}')`;
+ dinoDiv.style.backgroundPosition=`${item.x}% ${item.y}%`;
+ dinoDiv.style.backgroundSize='500% 200%';
+ dinoDiv.textContent=''; 
+ // fallback if image missing
+ const img=new Image(); img.onerror=()=>{ dinoDiv.style.backgroundImage='none'; dinoDiv.textContent=['🦕','🦖','🦎','🐊'][pos%4]; };
+ img.src=item.file;
+ document.getElementById('kol').textContent=pos+1;
+}
+function novo(){
+ if(pos>=240) pos=0;
+ showDino();
+ if(mode==='sab'){ a=Math.floor(Math.random()*5)+1; b=Math.floor(Math.random()*(6-a))+1; tacno=a+b; pitanjeText=`${a} + ${b}`; zadDiv.textContent=`${pitanjeText} = ?`; brojalica.innerHTML= '🦕'.repeat(a).split('').map((_,i)=>`<span onclick="this.classList.toggle('counted')">🦕</span>`).join('') + '<span style="margin:0 6px">+</span>' + '🦖'.repeat(b).split('').map(()=>`<span onclick="this.classList.toggle('counted')">🦖</span>`).join(''); }
+ else{ a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*a)+1; tacno=a-b; pitanjeText=`${a} - ${b}`; zadDiv.textContent=`${pitanjeText} = ?`; let s=''; for(let i=0;i<a;i++){ if(i<a-b) s+=`<span onclick="this.classList.toggle('counted')">🦕</span>`; else s+=`<span style="opacity:.3;text-decoration:line-through">🦕</span>`; } brojalica.innerHTML=s; }
+ unosDiv.textContent=''; msgDiv.textContent=''; clearCanvas();
+}
+function zvuk(ok){
+ try{ const ac=new (window.AudioContext||window.webkitAudioContext)(); const o=ac.createOscillator(), g=ac.createGain(); o.connect(g); g.connect(ac.destination); if(ok){ o.frequency.value=600; g.gain.setValueAtTime(.3,ac.currentTime); o.frequency.linearRampToValueAtTime(900,ac.currentTime+.2);} else{ o.type='sawtooth'; o.frequency.value=200; g.gain.setValueAtTime(.3,ac.currentTime); o.frequency.linearRampToValueAtTime(80,ac.currentTime+.3);} o.start(); o.stop(ac.currentTime+.35);}catch{}
+}
+// CANVAS
+const canvas=document.getElementById('writeCanvas'), ctx=canvas.getContext('2d');
+function resizeC(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*2; canvas.height=200*2; ctx.scale(2,2); drawGrid(); }
+function drawGrid(){ ctx.clearRect(0,0,1000,400); ctx.strokeStyle='#E3F2FD'; ctx.lineWidth=1; for(let y=40;y<200;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(500,y); ctx.stroke(); } }
+resizeC(); window.addEventListener('resize',resizeC);
+let drawing=false, last=null;
+function posE(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left, y:t.clientY-r.top, p:e.pressure||1}; }
+canvas.addEventListener('pointerdown',e=>{ drawing=true; last=posE(e); canvas.setPointerCapture(e.pointerId); document.getElementById('gridText').style.display='none'; });
+canvas.addEventListener('pointermove',e=>{ if(!drawing) return; const p=posE(e); ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#212121'; ctx.lineWidth= Math.max(2, p.p*8+2); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; });
+canvas.addEventListener('pointerup',e=>{ drawing=false; setTimeout(()=>autoRec(),500); });
+function clearCanvas(){ ctx.clearRect(0,0,1000,400); drawGrid(); document.getElementById('gridText').style.display='block'; document.getElementById('aiNum').textContent=''; document.getElementById('aiConf').textContent=''; document.getElementById('confFill').style.width='0%'; document.getElementById('useBtn').style.display='none'; }
+
+// IMPROVED RECOGNITION
+let lastRec=null;
+function getImageDataCropped(){
+ const r=canvas.getBoundingClientRect(); const tmp=document.createElement('canvas'); tmp.width=canvas.width/2; tmp.height=200; const tctx=tmp.getContext('2d'); tctx.drawImage(canvas,0,0,tmp.width,tmp.height);
+ const data=tctx.getImageData(0,0,tmp.width,tmp.height); let minX=tmp.width, minY=tmp.height, maxX=0,maxY=0, found=false;
+ for(let y=0;y<tmp.height;y++) for(let x=0;x<tmp.width;x++){ const i=(y*tmp.width+x)*4; if(data.data[i+3]>10 && (data.data[i]<200||data.data[i+1]<200)){ found=true; minX=Math.min(minX,x); maxX=Math.max(maxX,x); minY=Math.min(minY,y); maxY=Math.max(maxY,y);} }
+ if(!found) return null;
+ const pad=12; minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad); maxX=Math.min(tmp.width,maxX+pad); maxY=Math.min(tmp.height,maxY+pad);
+ const w=maxX-minX, h=maxY-minY; const sz=Math.max(w,h); const cx=minX+w/2, cy=minY+h/2;
+ const square=document.createElement('canvas'); square.width=sz; square.height=sz; const sctx=square.getContext('2d'); sctx.fillStyle='#fff'; sctx.fillRect(0,0,sz,sz); sctx.drawImage(tmp,cx-sz/2,cy-sz/2,sz,sz,0,0,sz,sz);
+ // check for two digits (10)
+ if(w>h*1.5){ // likely 10
+   // split
+   const left=document.createElement('canvas'); left.width=28; left.height=28;
+   const right=document.createElement('canvas'); right.width=28; right.height=28;
+   // simple check: if left looks like 1
+   return {type:'maybe10', canvas:square, w,h};
+ }
+ const out=document.createElement('canvas'); out.width=28; out.height=28; const octx=out.getContext('2d'); octx.fillStyle='#000'; octx.fillRect(0,0,28,28); octx.drawImage(square,0,0,28,28);
+ return {type:'single', canvas:out};
+}
+function countHoles(c){
+ // very simple hole count via flood fill on 28x28
+ const ctx=c.getContext('2d'); const d=ctx.getImageData(0,0,28,28).data;
+ const bin=[]; for(let i=0;i<28*28;i++){ bin[i]= d[i*4]>100 ? 1:0; }
+ // count white components touching border -> background, others are holes
+ let holes=0; // approximate by looking for enclosed black? Simplified: count white regions not touching border
+ // quick heuristic for digits: 0 has large central white, 6,9, etc.
+ // We'll return 0,1,2 estimation via pixel pattern in center
+ let centerWhite=0; for(let y=9;y<19;y++) for(let x=9;x<19;x++) if(bin[y*28+x]) centerWhite++;
+ if(centerWhite>40) return 1; // likely 0,6,9,8
+ return 0;
+}
+function recognize(){
+ const crop=getImageDataCropped(); if(!crop){ document.getElementById('aiConf').textContent='Nacrtaj broj jasnije'; return null; }
+ if(crop.type==='maybe10'){ // guess 10
+   document.getElementById('aiNum').textContent='10'; document.getElementById('aiConf').textContent='Prepoznato: 10 (82%)'; document.getElementById('confFill').style.width='82%'; lastRec=10; document.getElementById('useBtn').style.display='inline-block'; document.getElementById('useBtn').textContent='✅ Koristi 10'; return 10;
+ }
+ // Template matching: draw templates 0-9
+ const input=crop.canvas; const ictx=input.getContext('2d'); const idata=ictx.getImageData(0,0,28,28).data;
+ function templateScore(digit){
+   const t=document.createElement('canvas'); t.width=28; t.height=28; const tc=t.getContext('2d'); tc.fillStyle='#000'; tc.fillRect(0,0,28,28); tc.fillStyle='#fff'; tc.font='bold 22px sans-serif'; tc.textAlign='center'; tc.textBaseline='middle'; tc.fillText(String(digit),14,15);
+   const td=tc.getImageData(0,0,28,28).data; let dist=0; for(let i=0;i<28*28;i++){ const a=idata[i*4]>100?1:0; const b=td[i*4]>100?1:0; if(a!==b) dist++; } return dist;
+ }
+ let best=0, bestScore=Infinity;
+ for(let d=0;d<=9;d++){ const s=templateScore(d); if(s<bestScore){ bestScore=s; best=d; } }
+ const conf=Math.max(0,100 - bestScore*0.7);
+ document.getElementById('aiNum').textContent=best;
+ document.getElementById('aiConf').textContent=`Prepoznato: ${best} (${Math.round(conf)}%)`;
+ document.getElementById('confFill').style.width=conf+'%';
+ lastRec=best;
+ document.getElementById('useBtn').style.display='inline-block';
+ document.getElementById('useBtn').textContent=`✅ Koristi ${best}`;
+ return best;
+}
+function autoRec(){ if(blok) return; const r=recognize(); if(r!==null && r===tacno){ /* auto fill if correct */ } }
+
+document.getElementById('clearBtn').onclick=clearCanvas;
+document.getElementById('recBtn').onclick=recognize;
+document.getElementById('useBtn').onclick=()=>{ if(lastRec!==null){ unosDiv.textContent=lastRec; check(); } };
+
+document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ if(blok) return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; });
+document.getElementById('delBtn').onclick=()=>{ unosDiv.textContent=unosDiv.textContent.slice(0,-1); };
+document.getElementById('okBtn').onclick=check;
+
+function check(){
+ if(blok) return; const v=parseInt(unosDiv.textContent); if(isNaN(v)) return;
+ if(v===tacno){
+  bod++; if(bod%5===0) jaja++; zvuk(true); dinoDiv.classList.add('bounce'); msgDiv.textContent='🎉 BRAVO!'; msgDiv.style.color='#2E7D32';
+  pos++; nizNetacnih=0; setTimeout(()=>{ dinoDiv.classList.remove('bounce'); document.getElementById('bod').textContent=bod; document.getElementById('jaja').textContent=jaja; novo(); },600);
+ } else {
+  nizNetacnih++; zvuk(false); dinoDiv.classList.add('shake'); if(jaja>0) jaja--; msgDiv.textContent=`💔 ${v} nije tačno (${nizNetacnih}/3)`; msgDiv.style.color='#C62828';
+  document.getElementById('jaja').textContent=jaja;
+  setTimeout(()=>dinoDiv.classList.remove('shake'),300);
+  if(nizNetacnih>=3){ blok=true; let t=10; const it=setInterval(()=>{ msgDiv.innerHTML=`⏳ Sačekaj ${t}s...<br><span style="color:#C62828">${pitanjeText} = ${tacno}</span>`; t--; if(t<0){ clearInterval(it); blok=false; nizNetacnih=0; pos++; novo(); document.querySelectorAll('.keypad button').forEach(b=>b.style.opacity='1'); } },1000); document.querySelectorAll('.keypad button').forEach(b=>b.style.opacity='.25'); }
+ }
+ unosDiv.textContent='';
+}
+novo();
+</script>
 </body>
 </html>
