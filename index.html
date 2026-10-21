@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Dino Matematika - iPad Final</title>
+<title>Dino Matematika - Final Fix</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 body{background:#A5D6A7;display:flex;justify-content:center;min-height:100dvh;transition:.3s}
@@ -14,26 +14,28 @@ body.oduzimanje{background:#FFCDD2}
 .top .active{color:#fff} #sabBtn.active{background:#2E7D32} #oduBtn.active{background:#C62828} #sabBtn,#oduBtn{background:#eee}
 .stats{display:flex;justify-content:space-around;font-weight:800;padding:6px 12px}
 #dinoWrap{display:flex;justify-content:center;padding:8px}
-#dinoSprite{width:170px;height:170px;background:#f6f6f6;border-radius:20px;border:3px solid #eee;overflow:hidden;position:relative;flex-shrink:0}
-#dinoImg{position:absolute;width:500%;height:200%;left:0;top:0;display:block;user-select:none;-webkit-user-drag:none}
+#dinoSprite{width:170px;height:170px;background:#f6f6f6;border-radius:20px;border:3px solid #eee;overflow:hidden;position:relative}
+#dinoImg{position:absolute;width:500%;height:200%;left:0;top:0;display:block}
 #dinoFallback{width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:80px}
 #zad{font-size:44px;font-weight:900;text-align:center;margin:4px 0}
-#brojalica{text-align:center;font-size:30px;min-height:36px;letter-spacing:2px}
+#brojalica{text-align:center;font-size:32px;min-height:44px;padding:4px 8px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;align-items:center}
+#brojalica span{cursor:pointer;padding:4px 2px;border-radius:10px;transition:.2s;user-select:none;display:inline-block;min-width:28px}
+#brojalica span.counted{background:#C8E6C9;transform:scale(1.25);box-shadow:0 2px 6px rgba(0,0,0,.2)}
+#brojalica span.crossed{opacity:.35;text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#C62828}
+#brojalica .op{font-size:24px;font-weight:900;margin:0 4px;color:#555}
 #scribbleBox{margin:12px;border:3px solid #2E7D32;border-radius:18px;padding:12px;background:#F1F8E9}
 #scribbleBox label{font-weight:800;color:#2E7D32;display:block;margin-bottom:8px;font-size:14px}
 #scribbleInput{width:100%;height:84px;font-size:52px;font-weight:900;text-align:center;border:3px dashed #90A4AE;border-radius:14px;background:#fff;outline:none}
 #scribbleHint{font-size:12px;color:#666;text-align:center;margin-top:6px}
-#canvasBox{margin:0 12px 8px;border:2px dashed #B0BEC5;border-radius:14px;background:#fff;overflow:hidden}
-#writeCanvas{width:100%;height:130px;touch-action:none;display:block}
 #unosBox{display:flex;justify-content:center;align-items:center;gap:10px;margin:8px}
 #unos{width:90px;height:62px;border:3px solid #2E7D32;border-radius:14px;text-align:center;font-size:32px;font-weight:900;line-height:56px;background:#fff}
-#msg{text-align:center;font-weight:800;min-height:22px}
+#msg{text-align:center;font-weight:800;min-height:26px;font-size:15px}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px}
 .keypad button{height:62px;border-radius:16px;border:0;background:#F1F8E9;font-size:26px;font-weight:800;box-shadow:0 2px 0 #AED581;cursor:pointer}
 .keypad button:active{transform:scale(.96)}
 #okBtn{background:#2E7D32!important;color:#fff}
-.btnRow{display:flex;gap:8px;padding:0 12px}
-.btnRow button{flex:1;padding:10px;border-radius:12px;border:0;background:#ECEFF1;font-weight:700}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}} .shake{animation:shake .3s}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}} .bounce{animation:bounce .4s}
 </style>
 </head>
 <body>
@@ -44,13 +46,11 @@ body.oduzimanje{background:#FFCDD2}
 <div id="zad">3 + 2 = ?</div>
 <div id="brojalica"></div>
 <div id="scribbleBox">
-<label>✏️ Piši olovkom ovdje - iPad sam prepoznaje:</label>
-<input id="scribbleInput" type="text" inputmode="numeric" lang="sr" placeholder="Napiši 5" autocomplete="off" autocorrect="off" spellcheck="false">
-<div id="scribbleHint">Sa Apple Pencil piši direktno u polje - koristi iPad nativni model (Scribble)</div>
+<label>✏️ Piši olovkom ovdje:</label>
+<input id="scribbleInput" type="text" inputmode="numeric" lang="sr" placeholder="5" autocomplete="off" autocorrect="off" spellcheck="false">
+<div id="scribbleHint">Apple Pencil - iPad sam pretvara rukopis u broj</div>
 </div>
-<div id="canvasBox"><canvas id="writeCanvas"></canvas></div>
 <div id="unosBox"><div id="unos"></div><div id="msg"></div></div>
-<div class="btnRow"><button id="clearBtn">🧹 Obriši tablu</button></div>
 <div class="keypad">
 <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button>
 <button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button>
@@ -66,44 +66,85 @@ let order=[...Array(240).keys()].sort(()=>Math.random()-0.5);
 let pos=0,bod=0,jaja=0,nizNet=0,blok=false,mode=localStorage.getItem('dino_mode')||'sab',a,b,tacno;
 const dinoImg=document.getElementById('dinoImg'),dinoFallback=document.getElementById('dinoFallback'),zadDiv=document.getElementById('zad'),brojalica=document.getElementById('brojalica'),unosDiv=document.getElementById('unos'),msgDiv=document.getElementById('msg'),scribbleInput=document.getElementById('scribbleInput');
 const sabBtn=document.getElementById('sabBtn'),oduBtn=document.getElementById('oduBtn');
+
+// ZVUKOVI
+let audioCtx=null;
+function getAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function zvukTacno(){
+ try{ const ac=getAudio(); const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value=523; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(1046,ac.currentTime+0.25); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.35); o.start(); o.stop(ac.currentTime+0.35);}catch{}
+}
+function zvukNetacno(){
+ try{ const ac=getAudio(); const o=ac.createOscillator(),g=ac.createGain(); o.type='sawtooth'; o.connect(g); g.connect(ac.destination); o.frequency.value=200; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(60,ac.currentTime+0.4); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.4); o.start(); o.stop(ac.currentTime+0.4);}catch{}
+}
+
 function updMode(){ if(mode==='sab'){document.body.classList.remove('oduzimanje');sabBtn.classList.add('active');oduBtn.classList.remove('active');document.getElementById('unos').style.borderColor='#2E7D32';document.getElementById('okBtn').style.background='#2E7D32'}else{document.body.classList.add('oduzimanje');oduBtn.classList.add('active');sabBtn.classList.remove('active');document.getElementById('unos').style.borderColor='#C62828';document.getElementById('okBtn').style.background='#C62828'} localStorage.setItem('dino_mode',mode); }
 sabBtn.onclick=()=>{mode='sab';updMode();novo()}; oduBtn.onclick=()=>{mode='odu';updMode();novo()}; updMode();
+
 function showDino(){
   const it=all[order[pos]];
-  const col = it.x / 25; // 0-4
-  const row = it.y / 100; // 0-1
-  dinoImg.style.display='none';
-  dinoFallback.style.display='none';
+  const col = it.x / 25; const row = it.y / 100;
+  dinoImg.style.display='none'; dinoFallback.style.display='none';
   const temp=new Image();
-  temp.onload=()=>{
-    dinoImg.src=it.file;
-    dinoImg.style.left = `-${col*100}%`;
-    dinoImg.style.top = `-${row*100}%`;
-    dinoImg.style.display='block';
-    dinoFallback.style.display='none';
-  };
-  temp.onerror=()=>{
-    dinoImg.style.display='none';
-    dinoFallback.style.display='flex';
-  };
+  temp.onload=()=>{ dinoImg.src=it.file; dinoImg.style.left=`-${col*100}%`; dinoImg.style.top=`-${row*100}%`; dinoImg.style.display='block'; dinoFallback.style.display='none'; };
+  temp.onerror=()=>{ dinoImg.style.display='none'; dinoFallback.style.display='flex'; };
   temp.src=it.file;
   document.getElementById('kol').textContent=pos+1;
 }
-function novo(){ showDino(); if(mode==='sab'){a=Math.floor(Math.random()*5)+1; b=Math.floor(Math.random()*(6-a))+1; tacno=a+b; zadDiv.textContent=`${a} + ${b} = ?`; brojalica.innerHTML='🦕'.repeat(a).split('').map(()=>`<span>🦕</span>`).join('')+' + '+'🦖'.repeat(b).split('').map(()=>`<span>🦖</span>`).join('')} else{a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*a)+1; tacno=a-b; zadDiv.textContent=`${a} - ${b} = ?`; let s='';for(let i=0;i<a;i++)s+=i<a-b?`<span>🦕</span>`:`<span style="opacity:.25">💀</span>`; brojalica.innerHTML=s} unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent=''; clearCanvas(); }
+function novo(){
+  showDino();
+  if(mode==='sab'){
+    a=Math.floor(Math.random()*5)+1; b=Math.floor(Math.random()*(6-a))+1; tacno=a+b;
+    zadDiv.textContent=`${a} + ${b} = ?`;
+    // ISPRAVLJENO: tačno a zelenih + b narandžastih, bez viška
+    let html='';
+    for(let i=0;i<a;i++) html+=`<span data-i="${i}" onclick="this.classList.toggle('counted')">🦕</span>`;
+    html+=`<span class="op">+</span>`;
+    for(let i=0;i<b;i++) html+=`<span data-i="${a+i}" onclick="this.classList.toggle('counted')">🦖</span>`;
+    brojalica.innerHTML=html;
+  } else {
+    a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*a)+1; tacno=a-b;
+    zadDiv.textContent=`${a} - ${b} = ?`;
+    // VRAĆENO: prekriženi dinosi, bez lobanja
+    let html='';
+    for(let i=0;i<a;i++){
+      if(i < a-b) html+=`<span onclick="this.classList.toggle('counted')">🦕</span>`;
+      else html+=`<span class="crossed">🦕</span>`;
+    }
+    brojalica.innerHTML=html;
+  }
+  unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent='';
+}
 scribbleInput.addEventListener('input',()=>{ let v=scribbleInput.value.replace(/[^0-9]/g,'').slice(0,2); if(v!==scribbleInput.value) scribbleInput.value=v; if(v!==''){ unosDiv.textContent=v; if(!blok) setTimeout(()=>{ const vv=parseInt(unosDiv.textContent); if(!isNaN(vv)) check(); },600); }});
-const canvas=document.getElementById('writeCanvas'),ctx=canvas.getContext('2d');
-function clearCanvas(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*2; canvas.height=130*2; ctx.scale(2,2); ctx.clearRect(0,0,500,200); ctx.strokeStyle='#E3F2FD'; ctx.lineWidth=1; for(let y=32;y<130;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(500,y);ctx.stroke()} }
-clearCanvas(); window.addEventListener('resize',clearCanvas);
-let drawing=false,last=null;
-function getPos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top,p:e.pressure||0}}
-canvas.addEventListener('pointerdown',e=>{drawing=true;last=getPos(e);canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=getPos(e);ctx.strokeStyle='#111';ctx.lineWidth=Math.max(2.5,p.p*10+2.5);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;});
-canvas.addEventListener('pointerup',()=>{drawing=false;});
-document.getElementById('clearBtn').onclick=clearCanvas;
-document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
+document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; getAudio(); });
 document.getElementById('delBtn').onclick=()=>{ unosDiv.textContent=unosDiv.textContent.slice(0,-1); scribbleInput.value=unosDiv.textContent; };
 document.getElementById('okBtn').onclick=()=>check();
-function check(){ if(blok)return; const v=parseInt(unosDiv.textContent||scribbleInput.value); if(isNaN(v)) return; if(v===tacno){bod++; if(bod%5===0)jaja++; document.getElementById('bod').textContent=bod; document.getElementById('jaja').textContent=jaja; msgDiv.textContent='🎉 BRAVO!'; msgDiv.style.color='#2E7D32'; pos++; if(pos>=240) pos=0; nizNet=0; setTimeout(novo,600);} else{ nizNet++; if(jaja>0)jaja--; document.getElementById('jaja').textContent=jaja; msgDiv.textContent=`💔 ${v} nije tačno (${nizNet}/3)`; msgDiv.style.color='#C62828'; if(nizNet>=3){blok=true; let t=10; const it=setInterval(()=>{msgDiv.innerHTML=`⏳ Sačekaj ${t}s...<br><span style="color:#C62828">${a} ${mode==='sab'?'+':'-'} ${b} = ${tacno}</span>`; t--; if(t<0){clearInterval(it);blok=false;nizNet=0;pos++;novo();}},1000);}} unosDiv.textContent=''; scribbleInput.value=''; }
+function check(){
+  if(blok)return;
+  const v=parseInt(unosDiv.textContent||scribbleInput.value);
+  if(isNaN(v)) return;
+  if(v===tacno){
+    bod++; if(bod%5===0)jaja++;
+    document.getElementById('bod').textContent=bod; document.getElementById('jaja').textContent=jaja;
+    zvukTacno();
+    msgDiv.textContent='🎉 BRAVO!'; msgDiv.style.color='#2E7D32';
+    document.getElementById('dinoSprite').classList.add('bounce'); setTimeout(()=>document.getElementById('dinoSprite').classList.remove('bounce'),400);
+    pos++; if(pos>=240) pos=0; nizNet=0; setTimeout(novo,700);
+  } else {
+    nizNet++; if(jaja>0)jaja--; document.getElementById('jaja').textContent=jaja;
+    zvukNetacno();
+    msgDiv.textContent=`💔 ${v} nije tačno (${nizNet}/3)`; msgDiv.style.color='#C62828';
+    document.getElementById('dinoSprite').classList.add('shake'); setTimeout(()=>document.getElementById('dinoSprite').classList.remove('shake'),300);
+    if(nizNet>=3){
+      blok=true;
+      let t=10;
+      const it=setInterval(()=>{
+        msgDiv.innerHTML=`⏳ Sačekaj ${t}s...<br><span style="color:#C62828;font-size:18px">${a} ${mode==='sab'?'+':'-'} ${b} = ${tacno}</span>`;
+        t--; if(t<0){clearInterval(it);blok=false;nizNet=0;pos++;if(pos>=240)pos=0;novo();}
+      },1000);
+    }
+  }
+  unosDiv.textContent=''; scribbleInput.value='';
+}
 novo();
 </script>
 </body>
