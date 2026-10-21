@@ -50,7 +50,7 @@ body.oduzimanje{background:#FFCDD2}
 <div id="scribbleBox">
 <label>✏️ Piši olovkom ovdje:</label>
 <input id="scribbleInput" type="text" inputmode="numeric" lang="sr" autocomplete="off" autocorrect="off" spellcheck="false">
-<div id="scribbleHint">Piši cijeli broj - provjerava nakon 2.5s</div>
+<div id="scribbleHint">Imaš 4s za pisanje - provjera 1s nakon</div>
 </div>
 <div id="unosBox"><div id="unos"></div><div id="msg"></div></div>
 <div class="keypad">
@@ -58,7 +58,6 @@ body.oduzimanje{background:#FFCDD2}
 <button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button>
 <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
 <button id="delBtn">⌫</button><button data-v="0">0</button><button id="okBtn">OK</button>
-<button data-v="10" style="grid-column:span 3;background:#FFF9C4">10</button>
 </div>
 </div>
 <script>
@@ -82,31 +81,34 @@ function novo(){
   showDino();
   if(mode==='sab'){ a=Math.floor(Math.random()*5)+1; b=Math.floor(Math.random()*(6-a))+1; tacno=a+b; zadDiv.textContent=`${a} + ${b} = ?`; let html=''; for(let i=0;i<a;i++) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦕</span>`; html+=`<span class="op">+</span>`; for(let i=0;i<b;i++) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦖</span>`; brojalica.innerHTML=html; }
   else { a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*a)+1; tacno=a-b; zadDiv.textContent=`${a} - ${b} = ?`; let html=''; for(let i=0;i<a;i++){ if(i < a-b) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦕</span>`; else html+=`<span class="crossed">🦕</span>`; } brojalica.innerHTML=html; }
-  unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent=''; clearTimeout(window.dinoTimer);
+  unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent=''; clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer);
 }
-scribbleInput.addEventListener('pointerdown',()=>{unlockAudio(); clearTimeout(window.dinoTimer);});
+scribbleInput.addEventListener('pointerdown',()=>{unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer);});
 scribbleInput.addEventListener('input',()=>{
   unlockAudio();
   let v=scribbleInput.value.replace(/[^0-9]/g,'').slice(0,2);
   if(v!==scribbleInput.value) scribbleInput.value=v;
   if(v!==''){
     clearTimeout(window.dinoTimer);
-    const delay = (v==='1') ? 3500 : 2500;
+    clearTimeout(window.checkTimer);
+    const prepoznavanje = (v==='1') ? 5000 : 4000;
     window.dinoTimer=setTimeout(()=>{
       unosDiv.textContent=v;
-      const vv=parseInt(v);
-      if(!isNaN(vv)) check();
-    },delay);
+      window.checkTimer=setTimeout(()=>{
+        const vv=parseInt(v);
+        if(!isNaN(vv)) check();
+      },1000);
+    },prepoznavanje);
   }
 });
-document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
-document.getElementById('delBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); unosDiv.textContent=unosDiv.textContent.slice(0,-1); scribbleInput.value=unosDiv.textContent; };
-document.getElementById('okBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); if(scribbleInput.value) unosDiv.textContent=scribbleInput.value; check(); };
+document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer); if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
+document.getElementById('delBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer); unosDiv.textContent=unosDiv.textContent.slice(0,-1); scribbleInput.value=unosDiv.textContent; };
+document.getElementById('okBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer); if(scribbleInput.value) unosDiv.textContent=scribbleInput.value; check(); };
 function check(){
   if(blok)return;
   const v=parseInt(unosDiv.textContent||scribbleInput.value);
   if(isNaN(v)) return;
-  clearTimeout(window.dinoTimer);
+  clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer);
   if(v===tacno){
     bod++; if(bod%5===0)jaja++; document.getElementById('bod').textContent=bod; document.getElementById('jaja').textContent=jaja;
     zvukTacno(); msgDiv.textContent='🎉 BRAVO!'; msgDiv.style.color='#2E7D32';
