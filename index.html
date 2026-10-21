@@ -50,7 +50,7 @@ body.oduzimanje{background:#FFCDD2}
 <div id="scribbleBox">
 <label>✏️ Piši olovkom ovdje:</label>
 <input id="scribbleInput" type="text" inputmode="numeric" lang="sr" autocomplete="off" autocorrect="off" spellcheck="false">
-<div id="scribbleHint">Imaš 4s za pisanje - provjera 1s nakon</div>
+<div id="scribbleHint">Apple Pencil - iPad sam pretvara rukopis u broj</div>
 </div>
 <div id="unosBox"><div id="unos"></div><div id="msg"></div></div>
 <div class="keypad">
@@ -58,6 +58,7 @@ body.oduzimanje{background:#FFCDD2}
 <button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button>
 <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
 <button id="delBtn">⌫</button><button data-v="0">0</button><button id="okBtn">OK</button>
+<button data-v="10" style="grid-column:span 3;background:#FFF9C4">10</button>
 </div>
 </div>
 <script>
@@ -70,8 +71,8 @@ const sabBtn=document.getElementById('sabBtn'),oduBtn=document.getElementById('o
 let audioCtx=null;
 function getAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 function unlockAudio(){ try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); g.gain.value=0; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.01);}catch{} }
-document.addEventListener('pointerdown',()=>{ unlockAudio(); });
-document.addEventListener('touchstart',()=>{ unlockAudio(); });
+document.addEventListener('pointerdown',()=>{ unlockAudio(); }, {once:false});
+document.addEventListener('touchstart',()=>{ unlockAudio(); }, {once:false});
 function zvukTacno(){ try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value=523; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(1046,ac.currentTime+0.25); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.35); o.start(); o.stop(ac.currentTime+0.35);}catch{} }
 function zvukNetacno(){ try{ const ac=getAudio(); if(ac.state==='suspended') ac.resume(); const o=ac.createOscillator(),g=ac.createGain(); o.type='sawtooth'; o.connect(g); g.connect(ac.destination); o.frequency.value=200; g.gain.setValueAtTime(0.4,ac.currentTime); o.frequency.linearRampToValueAtTime(60,ac.currentTime+0.4); g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.4); o.start(); o.stop(ac.currentTime+0.4);}catch{} }
 function updMode(){ if(mode==='sab'){document.body.classList.remove('oduzimanje');sabBtn.classList.add('active');oduBtn.classList.remove('active');document.getElementById('unos').style.borderColor='#2E7D32';document.getElementById('okBtn').style.background='#2E7D32'}else{document.body.classList.add('oduzimanje');oduBtn.classList.add('active');sabBtn.classList.remove('active');document.getElementById('unos').style.borderColor='#C62828';document.getElementById('okBtn').style.background='#C62828'} localStorage.setItem('dino_mode',mode); }
@@ -79,46 +80,69 @@ sabBtn.onclick=()=>{unlockAudio(); mode='sab';updMode();novo()}; oduBtn.onclick=
 function showDino(){ const it=all[order[pos]]; const col=it.x/25; const row=it.y/100; dinoImg.style.display='none'; dinoFallback.style.display='none'; const temp=new Image(); temp.onload=()=>{ dinoImg.src=it.file; dinoImg.style.left=`-${col*100}%`; dinoImg.style.top=`-${row*100}%`; dinoImg.style.display='block'; dinoFallback.style.display='none'; }; temp.onerror=()=>{ dinoImg.style.display='none'; dinoFallback.style.display='flex'; }; temp.src=it.file; document.getElementById('kol').textContent=pos+1; }
 function novo(){
   showDino();
-  if(mode==='sab'){ a=Math.floor(Math.random()*5)+1; b=Math.floor(Math.random()*(6-a))+1; tacno=a+b; zadDiv.textContent=`${a} + ${b} = ?`; let html=''; for(let i=0;i<a;i++) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦕</span>`; html+=`<span class="op">+</span>`; for(let i=0;i<b;i++) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦖</span>`; brojalica.innerHTML=html; }
-  else { a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*a)+1; tacno=a-b; zadDiv.textContent=`${a} - ${b} = ?`; let html=''; for(let i=0;i<a;i++){ if(i < a-b) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦕</span>`; else html+=`<span class="crossed">🦕</span>`; } brojalica.innerHTML=html; }
-  unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent=''; clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer);
+  if(mode==='sab'){
+    a=Math.floor(Math.random()*5)+1; b=Math.floor(Math.random()*(6-a))+1; tacno=a+b;
+    zadDiv.textContent=`${a} + ${b} = ?`;
+    let html='';
+    for(let i=0;i<a;i++) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦕</span>`;
+    html+=`<span class="op">+</span>`;
+    for(let i=0;i<b;i++) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦖</span>`;
+    brojalica.innerHTML=html;
+  } else {
+    a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*a)+1; tacno=a-b;
+    zadDiv.textContent=`${a} - ${b} = ?`;
+    let html='';
+    for(let i=0;i<a;i++){
+      if(i < a-b) html+=`<span onclick="unlockAudio(); this.classList.toggle('counted')">🦕</span>`;
+      else html+=`<span class="crossed">🦕</span>`;
+    }
+    brojalica.innerHTML=html;
+  }
+  unosDiv.textContent=''; scribbleInput.value=''; msgDiv.textContent='';
 }
-scribbleInput.addEventListener('pointerdown',()=>{unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer);});
+scribbleInput.addEventListener('pointerdown',()=>{unlockAudio();});
 scribbleInput.addEventListener('input',()=>{
   unlockAudio();
   let v=scribbleInput.value.replace(/[^0-9]/g,'').slice(0,2);
   if(v!==scribbleInput.value) scribbleInput.value=v;
   if(v!==''){
-    clearTimeout(window.dinoTimer);
-    clearTimeout(window.checkTimer);
-    const prepoznavanje = (v==='1') ? 5000 : 4000;
-    window.dinoTimer=setTimeout(()=>{
-      unosDiv.textContent=v;
-      window.checkTimer=setTimeout(()=>{
-        const vv=parseInt(v);
+    unosDiv.textContent=v;
+    if(!blok){
+      clearTimeout(window.dinoTimer);
+      window.dinoTimer=setTimeout(()=>{
+        const vv=parseInt(unosDiv.textContent);
         if(!isNaN(vv)) check();
-      },1000);
-    },prepoznavanje);
+      },1200);
+    }
   }
 });
-document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer); if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
-document.getElementById('delBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer); unosDiv.textContent=unosDiv.textContent.slice(0,-1); scribbleInput.value=unosDiv.textContent; };
-document.getElementById('okBtn').onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer); if(scribbleInput.value) unosDiv.textContent=scribbleInput.value; check(); };
+document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ unlockAudio(); if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
+document.getElementById('delBtn').onclick=()=>{ unlockAudio(); unosDiv.textContent=unosDiv.textContent.slice(0,-1); scribbleInput.value=unosDiv.textContent; };
+document.getElementById('okBtn').onclick=()=>{ unlockAudio(); check(); };
 function check(){
   if(blok)return;
   const v=parseInt(unosDiv.textContent||scribbleInput.value);
   if(isNaN(v)) return;
-  clearTimeout(window.dinoTimer); clearTimeout(window.checkTimer);
   if(v===tacno){
-    bod++; if(bod%5===0)jaja++; document.getElementById('bod').textContent=bod; document.getElementById('jaja').textContent=jaja;
-    zvukTacno(); msgDiv.textContent='🎉 BRAVO!'; msgDiv.style.color='#2E7D32';
+    bod++; if(bod%5===0)jaja++;
+    document.getElementById('bod').textContent=bod; document.getElementById('jaja').textContent=jaja;
+    zvukTacno();
+    msgDiv.textContent='🎉 BRAVO!'; msgDiv.style.color='#2E7D32';
     document.getElementById('dinoSprite').classList.add('bounce'); setTimeout(()=>document.getElementById('dinoSprite').classList.remove('bounce'),400);
     pos++; if(pos>=240) pos=0; nizNet=0; setTimeout(novo,700);
   } else {
     nizNet++; if(jaja>0)jaja--; document.getElementById('jaja').textContent=jaja;
-    zvukNetacno(); msgDiv.textContent=`💔 ${v} nije tačno (${nizNet}/3)`; msgDiv.style.color='#C62828';
+    zvukNetacno();
+    msgDiv.textContent=`💔 ${v} nije tačno (${nizNet}/3)`; msgDiv.style.color='#C62828';
     document.getElementById('dinoSprite').classList.add('shake'); setTimeout(()=>document.getElementById('dinoSprite').classList.remove('shake'),300);
-    if(nizNet>=3){ blok=true; let t=10; const it=setInterval(()=>{ msgDiv.innerHTML=`⏳ Sačekaj ${t}s...<br><span style="color:#C62828;font-size:18px">${a} ${mode==='sab'?'+':'-'} ${b} = ${tacno}</span>`; t--; if(t<0){clearInterval(it);blok=false;nizNet=0;pos++;if(pos>=240)pos=0;novo();}},1000); }
+    if(nizNet>=3){
+      blok=true;
+      let t=10;
+      const it=setInterval(()=>{
+        msgDiv.innerHTML=`⏳ Sačekaj ${t}s...<br><span style="color:#C62828;font-size:18px">${a} ${mode==='sab'?'+':'-'} ${b} = ${tacno}</span>`;
+        t--; if(t<0){clearInterval(it);blok=false;nizNet=0;pos++;if(pos>=240)pos=0;novo();}
+      },1000);
+    }
   }
   unosDiv.textContent=''; scribbleInput.value='';
 }
