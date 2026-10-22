@@ -116,7 +116,7 @@ scribbleInput.addEventListener('input',()=>{
       unosDiv.textContent=v;
       const vv=parseInt(v);
       if(!isNaN(vv)) check();
-    },2000);
+    },1200);
   }
 });
 document.querySelectorAll('.keypad button[data-v]').forEach(b=> b.onclick=()=>{ unlockAudio(); clearTimeout(window.dinoTimer); if(blok)return; if(unosDiv.textContent.length<2) unosDiv.textContent+=b.dataset.v; scribbleInput.value=unosDiv.textContent; });
